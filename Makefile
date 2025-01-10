@@ -8,12 +8,14 @@ AVRDUDE = avrdude
 RM = rm -f
 
 MCU = atmega328p
+#MCU = atmega2560
 #F_CPU = 16000000UL
 F_CPU = 8000000UL
 BAUD = 9600
 
-TARGET = led
-SRC = led.c baud.c
+TARGET = lol
+#SRC = main.c
+SRC = main.c uart.c
 OBJ = $(SRC:.c=.o)
 #LST = $(SRC:.c=.lst)
 

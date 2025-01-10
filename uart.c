@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <util/setbaud.h>
 
-#include "baud.h"
+#include "uart.h"
 #include "custom.h"
 
 void uart_init(void)
@@ -13,8 +13,8 @@ void uart_init(void)
 #else
 	BOFF(UCSR0A, U2X0);
 #endif
-	BASS2(UCSR0B, TXEN0, RXEN0);
-	BASS2(UCSR0C, UCSZ01, UCSZ00);
+	BSET2(UCSR0B, TXEN0, RXEN0);
+	BSET2(UCSR0C, UCSZ01, UCSZ00);
 }
 
 void uart_sendbyte(u8 data)
@@ -27,4 +27,10 @@ u8 uart_recvbyte(void)
 {
 	loop_until_bit_is_set(UCSR0A, RXC0);
 	return UDR0;
+}
+
+void uart_sendstr(const char *p)
+{
+	while (*p)
+		uart_sendbyte(*p++);
 }
