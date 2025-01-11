@@ -31,7 +31,7 @@ int main(void)
 	for (;;) {
 		if (dbounce(&PIND, PIND2)) {
 			if (btn_pressed == 0) {
-				uart_sendstr("TEST TEST\n");
+				uart_sendbyte('x');
 				BON(PORTB, PB0);
 				_delay_ms(300);
 				BOFF(PORTB, PB0);

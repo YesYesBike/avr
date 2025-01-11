@@ -7,16 +7,22 @@ NM = avr-nm
 AVRDUDE = avrdude
 RM = rm -f
 
+CC_PC = cc
+CFLAGS_PC = 
+LDFLAGS_PC = 
+
 MCU = atmega328p
 #MCU = atmega2560
 #F_CPU = 16000000UL
 F_CPU = 8000000UL
 BAUD = 9600
 
-TARGET = lol
-#SRC = main.c
+TARGET = a.out
+TARGET_AVR = lol
 SRC = main.c uart.c
 OBJ = $(SRC:.c=.o)
+SRC_PC = pc_main.c
+OBJ_PC = $(SRC_PC:.c=.o)
 #LST = $(SRC:.c=.lst)
 
 CFLAGS := -DF_CPU=$(F_CPU)
@@ -46,20 +52,40 @@ AVRDUDE_FLAG += -v -V
 LFUSE = 0xE2
 #HFUSE = asdf
 
-comp: $(TARGET).hex
 
-%.o: %.c
-	$(CC) -c -o $@ $< $(CFLAGS)
+#Default Option
+first: comp
 
-$(TARGET).elf: $(OBJ)
-	$(CC) -mmcu=$(MCU) -o $@ $^ $(LDFLAGS)
 
-$(TARGET).hex: $(TARGET).elf
+#AVR
+comp: $(TARGET_AVR).hex
+
+$(TARGET_AVR).hex: $(TARGET_AVR).elf
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
 
+$(TARGET_AVR).elf: $(OBJ)
+	$(CC) -mmcu=$(MCU) -o $@ $^ $(LDFLAGS)
 
-up: $(TARGET).hex
-	$(AVRDUDE) $(AVRDUDE_FLAG) -Uflash:w:$(TARGET).hex
+
+#PC
+pc: $(TARGET)
+
+$(TARGET): $(OBJ_PC)
+	$(CC_PC) -o $@ $^
+
+
+#OBJ_AVR
+main.o: custom.h uart.h
+uart.o: custom.h uart.h
+
+#OBJ_PC
+pc_main.o: pc_main.c
+	$(CC_PC) -c $(CFLAGS_PC) -o $@ $<
+
+
+#Other Options
+up: $(TARGET_AVR).hex
+	$(AVRDUDE) $(AVRDUDE_FLAG) -Uflash:w:$(TARGET_AVR).hex
 
 lfuse:
 	$(AVRDUDE) $(AVRDUDE_FLAG) -Ulfuse:w:$(LFUSE):m
@@ -68,16 +94,16 @@ hfuse:
 	$(AVRDUDE) $(AVRDUDE_FLAG) -Uhfuse:w:$(HFUSE):m
 
 
-size: $(TARGET).elf
+size: $(TARGET_AVR).elf
 	$(SIZE) -C --mcu=$(AVRDUDE_MCU) $<
 
-nm: $(TARGET).elf
+nm: $(TARGET_AVR).elf
 	$(NM) -S --size-sort -t decimal $<
 
-dump: $(TARGET).elf
+dump: $(TARGET_AVR).elf
 	$(OBJDUMP) -f $<
 
 clean:
-	$(RM) $(TARGET).hex $(TARGET).elf $(OBJ)
+	$(RM) $(TARGET_AVR).hex $(TARGET_AVR).elf *.o
 
-.PHONY: comp up clean size dump nm
+.PHONY: first comp up clean size dump nm pc
