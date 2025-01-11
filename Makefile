@@ -54,11 +54,11 @@ LFUSE = 0xE2
 
 
 #Default Option
-first: comp
+all: avr pc
 
 
 #AVR
-comp: $(TARGET_AVR).hex
+avr: $(TARGET_AVR).hex
 
 $(TARGET_AVR).hex: $(TARGET_AVR).elf
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
@@ -106,4 +106,4 @@ dump: $(TARGET_AVR).elf
 clean:
 	$(RM) $(TARGET_AVR).hex $(TARGET_AVR).elf *.o
 
-.PHONY: first comp up clean size dump nm pc
+.PHONY: first all avr up clean size dump nm pc
